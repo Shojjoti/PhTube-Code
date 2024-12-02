@@ -1,4 +1,15 @@
 console.log("videos added")
+
+//time count function 
+function testTimeString(time)
+{
+    const hour = parseInt(time/3600);
+    let remainderSecond = time % 3600 ; 
+    const minute = parseInt(remainderSecond/60); 
+    remainderSecond =     (remainderSecond % 60) ;
+    return `${hour} hour ${minute} minute ${remainderSecond} second ago` ;
+}
+
 // create loadCategories
 const loadCategories=() => {
     //fetch the data
@@ -18,9 +29,33 @@ const loadVideos=() => {
 
 }
 
+const loadCategoryVideos = (id) =>{
+    //alert(id);
+    fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`) 
+    .then((res)=> res.json())    
+    .then((data)=> DisplayVideos(data.category))
+    .catch((error) => console.log(error));
+    
+};
+
 //create DisplayVideos
 const DisplayVideos = (videos) =>{
     const videoContainer = document.getElementById("videos") ;
+    videoContainer.innerHTML ="";
+    if(videos.length==0)
+    {
+        videoContainer.classList.remove("grid");
+        videoContainer.innerHTML=`
+         <div class="min-h-screen flex flex-col gap-5 justify-center items-center">
+           <img src="asset/Icon.png"
+         </div>
+         <p class="text-xl"> NO CONTENT HERE IN THIS CATEGORY</p>
+
+        ` ;
+    }
+    else{
+        videoContainer.classList.add("grid");
+    }
     videos.forEach(
         (video)=>{
             console.log(video);
@@ -32,7 +67,8 @@ const DisplayVideos = (videos) =>{
                  src=${video.thumbnail}
                  class="h-full w-full object-cover"
                  alt="thumbnail" />
-                 <span class="absolute right-2 bottom-2 bg-black text-white rounded p-1 ">${video.others.posted_date}</span>
+                 ${video.others.posted_date.length==0 ? "" :`<span class="absolute text-xs right-2 bottom-2 bg-black text-white rounded p-1 ">${testTimeString(video.others.posted_date)}</span>` }
+                 
             </figure>
             <div class="px-0 py-2 flex gap-2">
               
@@ -53,10 +89,11 @@ const DisplayVideos = (videos) =>{
 
             </div>
             `;
+           
             videoContainer.append(card);
-
         }
     );
+    
 };
 
 //create DisplayCategories
@@ -68,12 +105,17 @@ const DisplayCategories = (categories) => {
         console.log(item);
 
         //create a button 
-        const button = document.createElement("button");
-        button.classList = "btn" ;
-        button.innerText = item.category ; 
+        const buttonContainer = document.createElement("div");
+        buttonContainer.innerHTML = `
+          <button onclick="loadCategoryVideos( ${item.category_id})" class="btn">
+             ${item.category}          
+          </button>
+        
+        `;
+        
 
         //add button to category container
-        categoryContainer.append(button);
+        categoryContainer.append(buttonContainer);
         
     });
 
